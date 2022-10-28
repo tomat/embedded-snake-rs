@@ -47,7 +47,7 @@ impl<'a, T: PixelColor, const MAX_SIZE: usize> Iterator for SnakeIntoIterator<'a
 
 impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
     fn new(color: T, size_x: u8, size_y: u8) -> Snake<T, MAX_SIZE> {
-        Snake { parts: [Pixel::<T>(Point { x: 0, y: 0 }, color); MAX_SIZE], len: 5, direction: Direction::None, size_x: size_x, size_y: size_y }
+        Snake { parts: [Pixel::<T>(Point { x: 0, y: 0 }, color); MAX_SIZE], len: 5, direction: Direction::None, size_x, size_y }
     }
     fn set_direction(&mut self, direction: Direction) {
         self.direction = direction;
@@ -114,7 +114,7 @@ struct Food<T: PixelColor, RNG: rand_core::RngCore> {
 
 impl<T: PixelColor, RNG: rand_core::RngCore> Food<T, RNG> {
     pub fn new(color: T, rand_source: RNG, size_x: u8, size_y: u8) -> Self {
-        Food{ size_x: size_x, size_y: size_y, place: Pixel(Point { x: 0, y: 0 }, color), rng: rand_source }
+        Food{ size_x, size_y, place: Pixel(Point { x: 0, y: 0 }, color), rng: rand_source }
     }
     fn replace<'a, const MAX_SIZE: usize>(&mut self, iter_source: &Snake<T, MAX_SIZE>) {
         let mut p: Point;
@@ -160,7 +160,7 @@ impl<T: PixelColor, const MAX_SIZE: usize, RNG: rand_core::RngCore> SnakeGame<T,
         let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x, size_y);
         let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x, size_y);
         food.replace(&snake);
-        SnakeGame { snake: snake, food, food_age: 0, food_lifetime: food_lifetime }
+        SnakeGame { snake, food, food_age: 0, food_lifetime }
     }
     pub fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
