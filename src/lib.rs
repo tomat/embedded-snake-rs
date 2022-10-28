@@ -148,14 +148,14 @@ pub enum Direction {
     None,
 }
 
-pub struct SnakeGame<T: PixelColor, const MAX_SIZE: usize, RNG: rand_core::RngCore> {
+pub struct SnakeGame<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> {
     snake: Snake<T, MAX_SIZE>,
     food: Food<T, RNG>,
     food_age: u8,
     food_lifetime: u8
 }
 
-impl<T: PixelColor, const MAX_SIZE: usize, RNG: rand_core::RngCore> SnakeGame<T, MAX_SIZE, RNG> {
+impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MAX_SIZE, T, RNG> {
     pub fn new(size_x: u8, size_y: u8, rand_source: RNG, snake_color: T, food_color: T, food_lifetime: u8) -> Self {
         let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x, size_y);
         let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x, size_y);
