@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 embedded-graphics = "0.7.0"
 rand_core = "0.6.4"
+
+[dev-dependencies]
+embedded-graphics-simulator = "0.3.0"
+rand = "0.8.5"
