@@ -2,7 +2,7 @@
 //!
 
 use embedded_graphics::{
-    pixelcolor::{Rgb888},
+    pixelcolor::{BinaryColor},
     prelude::*,
 };
 use embedded_graphics_simulator::{
@@ -14,11 +14,16 @@ use rand::rngs::ThreadRng;
 use snake::*;
 
 fn main() -> Result<(), std::convert::Infallible> {
-    let mut display: SimulatorDisplay<Rgb888> = SimulatorDisplay::new(Size::new(8, 8));
+    let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 
-    let output_settings = OutputSettingsBuilder::new().scale(30).build();
+    let output_settings = OutputSettingsBuilder::new().scale(5).theme(embedded_graphics_simulator::BinaryColorTheme::OledBlue).build();
     let mut window = Window::new("Progress", &output_settings);
-    let mut game = SnakeGame::<Rgb888, 20, ThreadRng>::new(8, 8, rand::thread_rng(), Rgb888::RED, Rgb888::YELLOW, 10);
+    let mut game = SnakeGame::<BinaryColor, 100, ThreadRng>::new(
+        128, 64,
+        rand::thread_rng(),
+        BinaryColor::On,
+        BinaryColor::On,
+        50);
     window.update(&display);
     'running: loop {
         for event in window.events() {
@@ -37,9 +42,9 @@ fn main() -> Result<(), std::convert::Infallible> {
                 _ => {}
             }
         }
-        display.clear(Rgb888::BLACK)?;
+        display.clear(BinaryColor::Off)?;
         game.draw(&mut display);
         window.update(&display);
-        thread::sleep(Duration::from_millis(300));
+        thread::sleep(Duration::from_millis(50));
     }
 }
