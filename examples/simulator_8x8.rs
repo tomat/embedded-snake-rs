@@ -1,15 +1,12 @@
 //! # Example: Run Snake on a 8x8 RGB display, like a LED matrix
 //!
 
-use embedded_graphics::{
-    pixelcolor::{Rgb888},
-    prelude::*,
-};
+use embedded_graphics::{pixelcolor::Rgb888, prelude::*};
 use embedded_graphics_simulator::{
     sdl2::Keycode, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
-use std::{thread, time::Duration};
 use rand::rngs::ThreadRng;
+use std::{thread, time::Duration};
 
 use snake::*;
 
@@ -18,7 +15,16 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     let output_settings = OutputSettingsBuilder::new().scale(30).build();
     let mut window = Window::new("Progress", &output_settings);
-    let mut game = SnakeGame::<20, Rgb888, ThreadRng>::new(8, 8, 1, 1, rand::thread_rng(), Rgb888::RED, Rgb888::YELLOW, 10);
+    let mut game = SnakeGame::<20, Rgb888, ThreadRng>::new(
+        8,
+        8,
+        1,
+        1,
+        rand::thread_rng(),
+        Rgb888::RED,
+        Rgb888::YELLOW,
+        10,
+    );
     window.update(&display);
     'running: loop {
         for event in window.events() {

@@ -2,8 +2,9 @@
 
 use embedded_graphics::{
     pixelcolor::*,
-    prelude::{DrawTarget, Point, OriginDimensions, Size},
-    Drawable, Pixel, primitives::{Rectangle, PrimitiveStyle, Primitive},
+    prelude::{DrawTarget, OriginDimensions, Point, Size},
+    primitives::{Primitive, PrimitiveStyle, Rectangle},
+    Drawable, Pixel,
 };
 
 struct Snake<T: PixelColor, const MAX_SIZE: usize> {
@@ -11,7 +12,7 @@ struct Snake<T: PixelColor, const MAX_SIZE: usize> {
     len: usize,
     direction: Direction,
     size_x: u8,
-    size_y: u8
+    size_y: u8,
 }
 
 struct SnakeIntoIterator<'a, T: PixelColor, const MAX_SIZE: usize> {
@@ -31,7 +32,6 @@ impl<'a, T: PixelColor, const MAX_SIZE: usize> IntoIterator for &'a Snake<T, MAX
     }
 }
 
-
 impl<'a, T: PixelColor, const MAX_SIZE: usize> Iterator for SnakeIntoIterator<'a, T, MAX_SIZE> {
     type Item = Pixel<T>;
 
@@ -47,7 +47,13 @@ impl<'a, T: PixelColor, const MAX_SIZE: usize> Iterator for SnakeIntoIterator<'a
 
 impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
     fn new(color: T, size_x: u8, size_y: u8) -> Snake<T, MAX_SIZE> {
-        Snake { parts: [Pixel::<T>(Point { x: 0, y: 0 }, color); MAX_SIZE], len: 5, direction: Direction::None, size_x, size_y }
+        Snake {
+            parts: [Pixel::<T>(Point { x: 0, y: 0 }, color); MAX_SIZE],
+            len: 5,
+            direction: Direction::None,
+            size_x,
+            size_y,
+        }
     }
     fn set_direction(&mut self, direction: Direction) {
         self.direction = direction;
@@ -55,7 +61,7 @@ impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
     fn contains(&self, this: Point) -> bool {
         for part in self.into_iter() {
             if part.0 == this {
-                return true
+                return true;
             };
         }
         false
@@ -68,7 +74,7 @@ impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
     fn make_step(&mut self) {
         let mut i = self.len;
         while i > 0 {
-            self.parts[i] = self.parts[i-1];
+            self.parts[i] = self.parts[i - 1];
             i -= 1;
         }
         match self.direction {
@@ -78,29 +84,29 @@ impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
                 } else {
                     self.parts[0].0.x -= 1;
                 }
-            },
+            }
             Direction::Right => {
                 if self.parts[0].0.x == (self.size_x - 1) as i32 {
                     self.parts[0].0.x = 0;
                 } else {
                     self.parts[0].0.x += 1;
                 }
-            },
+            }
             Direction::Up => {
                 if self.parts[0].0.y == 0 {
                     self.parts[0].0.y = (self.size_y - 1) as i32;
                 } else {
                     self.parts[0].0.y -= 1;
                 }
-            },
+            }
             Direction::Down => {
                 if self.parts[0].0.y == (self.size_y - 1) as i32 {
                     self.parts[0].0.y = 0;
                 } else {
                     self.parts[0].0.y += 1;
                 }
-            },
-            Direction::None => {},
+            }
+            Direction::None => {}
         }
     }
 }
@@ -109,30 +115,38 @@ struct Food<T: PixelColor, RNG: rand_core::RngCore> {
     size_x: u8,
     size_y: u8,
     place: Pixel<T>,
-    rng: RNG
+    rng: RNG,
 }
 
 impl<T: PixelColor, RNG: rand_core::RngCore> Food<T, RNG> {
     pub fn new(color: T, rand_source: RNG, size_x: u8, size_y: u8) -> Self {
-        Food{ size_x, size_y, place: Pixel(Point { x: 0, y: 0 }, color), rng: rand_source }
+        Food {
+            size_x,
+            size_y,
+            place: Pixel(Point { x: 0, y: 0 }, color),
+            rng: rand_source,
+        }
     }
     fn replace<'a, const MAX_SIZE: usize>(&mut self, iter_source: &Snake<T, MAX_SIZE>) {
         let mut p: Point;
         'outer: loop {
             let random_number = self.rng.next_u32();
             let blocked_positions = iter_source.into_iter();
-            p = Point{
+            p = Point {
                 x: ((random_number >> 24) as u8 % self.size_x).into(),
-                y: ((random_number >> 16) as u8 % self.size_y).into()
+                y: ((random_number >> 16) as u8 % self.size_y).into(),
             };
             for blocked_position in blocked_positions {
                 if p == blocked_position.0 {
                     continue 'outer;
                 }
             }
-            break
+            break;
         }
-        self.place = Pixel::<T>{0: p, 1: self.place.1}
+        self.place = Pixel::<T> {
+            0: p,
+            1: self.place.1,
+        }
     }
     fn get_pixel(&self) -> Pixel<T> {
         self.place
@@ -156,22 +170,41 @@ pub struct SnakeGame<const MAX_SNAKE_SIZE: usize, T: PixelColor, RNG: rand_core:
     size_x: u8,
     size_y: u8,
     scale_x: u8,
-    scale_y: u8
+    scale_y: u8,
 }
 
 impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MAX_SIZE, T, RNG> {
-    pub fn new(size_x: u8, size_y: u8, scale_x: u8, scale_y: u8, rand_source: RNG, snake_color: T, food_color: T, food_lifetime: u8) -> Self {
+    pub fn new(
+        size_x: u8,
+        size_y: u8,
+        scale_x: u8,
+        scale_y: u8,
+        rand_source: RNG,
+        snake_color: T,
+        food_color: T,
+        food_lifetime: u8,
+    ) -> Self {
         let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x / scale_x, size_y / scale_y);
-        let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x / scale_x, size_y / scale_y);
+        let mut food =
+            Food::<T, RNG>::new(food_color, rand_source, size_x / scale_x, size_y / scale_y);
         food.replace(&snake);
-        SnakeGame { snake, food, food_age: 0, food_lifetime, size_x, size_y, scale_x, scale_y }
+        SnakeGame {
+            snake,
+            food,
+            food_age: 0,
+            food_lifetime,
+            size_x,
+            size_y,
+            scale_x,
+            scale_y,
+        }
     }
     pub fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
     }
     pub fn draw<D>(&mut self, target: &mut D) -> ()
     where
-    D: DrawTarget<Color = T>,
+        D: DrawTarget<Color = T>,
     {
         self.snake.make_step();
         let hit = self.snake.contains(self.food.get_pixel().0);
@@ -184,7 +217,13 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             self.food_age = 0;
         }
 
-        let mut scaled_display = ScaledDisplay::<D>{real_display: target, size_x: self.size_x / self.scale_x, size_y: self.size_y / self.scale_y, scale_x: self.scale_x, scale_y: self.scale_y};
+        let mut scaled_display = ScaledDisplay::<D> {
+            real_display: target,
+            size_x: self.size_x / self.scale_x,
+            size_y: self.size_y / self.scale_y,
+            scale_x: self.scale_x,
+            scale_y: self.scale_y,
+        };
 
         for part in self.snake.into_iter() {
             _ = part.draw(&mut scaled_display);
@@ -202,7 +241,7 @@ struct ScaledDisplay<'a, T: DrawTarget> {
     scale_y: u8,
 }
 
- impl<'a, T: DrawTarget> DrawTarget for ScaledDisplay<'a, T> {
+impl<'a, T: DrawTarget> DrawTarget for ScaledDisplay<'a, T> {
     type Color = T::Color;
     type Error = T::Error;
 
@@ -212,7 +251,13 @@ struct ScaledDisplay<'a, T: DrawTarget> {
     {
         for pixel in pixels {
             let style = PrimitiveStyle::with_fill(pixel.1);
-            Rectangle::new(Point::new(pixel.0.x * self.scale_x as i32, pixel.0.y * self.scale_y as i32), Size::new(self.scale_x as u32, self.scale_y as u32))
+            Rectangle::new(
+                Point::new(
+                    pixel.0.x * self.scale_x as i32,
+                    pixel.0.y * self.scale_y as i32,
+                ),
+                Size::new(self.scale_x as u32, self.scale_y as u32),
+            )
             .into_styled(style)
             .draw(self.real_display)?;
         }
@@ -230,24 +275,42 @@ impl<'a, T: DrawTarget> OriginDimensions for ScaledDisplay<'a, T> {
 mod tests {
 
     use crate::Snake;
-    use embedded_graphics::prelude::*;
     use embedded_graphics::pixelcolor::*;
+    use embedded_graphics::prelude::*;
 
-   #[test]
+    #[test]
     fn snake_basic() {
         let mut snake = Snake::<Rgb888, 20>::new(Rgb888::RED, 8, 8);
         snake.set_direction(crate::Direction::Right);
-        assert_eq!(Pixel::<Rgb888>(Point { x: 0, y: 0 }, Rgb888::RED), snake.into_iter().next().unwrap());
+        assert_eq!(
+            Pixel::<Rgb888>(Point { x: 0, y: 0 }, Rgb888::RED),
+            snake.into_iter().next().unwrap()
+        );
         snake.make_step();
-        assert_eq!(Pixel::<Rgb888>(Point { x: 1, y: 0 }, Rgb888::RED), snake.into_iter().nth(0).unwrap());
-        assert_eq!(Pixel::<Rgb888>(Point { x: 0, y: 0 }, Rgb888::RED), snake.into_iter().nth(1).unwrap());
+        assert_eq!(
+            Pixel::<Rgb888>(Point { x: 1, y: 0 }, Rgb888::RED),
+            snake.into_iter().nth(0).unwrap()
+        );
+        assert_eq!(
+            Pixel::<Rgb888>(Point { x: 0, y: 0 }, Rgb888::RED),
+            snake.into_iter().nth(1).unwrap()
+        );
         snake.set_direction(crate::Direction::Down);
         snake.make_step();
-        assert_eq!(Pixel::<Rgb888>(Point { x: 1, y: 1 }, Rgb888::RED), snake.into_iter().nth(0).unwrap());
-        assert_eq!(Pixel::<Rgb888>(Point { x: 1, y: 0 }, Rgb888::RED), snake.into_iter().nth(1).unwrap());
-        assert_eq!(Pixel::<Rgb888>(Point { x: 0, y: 0 }, Rgb888::RED), snake.into_iter().nth(2).unwrap());
-        assert_eq!(true, snake.contains(Point{x: 0, y: 0}));
-        assert_eq!(true, snake.contains(Point{x: 1, y: 0}));
-        assert_eq!(true, snake.contains(Point{x: 1, y: 1}));
+        assert_eq!(
+            Pixel::<Rgb888>(Point { x: 1, y: 1 }, Rgb888::RED),
+            snake.into_iter().nth(0).unwrap()
+        );
+        assert_eq!(
+            Pixel::<Rgb888>(Point { x: 1, y: 0 }, Rgb888::RED),
+            snake.into_iter().nth(1).unwrap()
+        );
+        assert_eq!(
+            Pixel::<Rgb888>(Point { x: 0, y: 0 }, Rgb888::RED),
+            snake.into_iter().nth(2).unwrap()
+        );
+        assert_eq!(true, snake.contains(Point { x: 0, y: 0 }));
+        assert_eq!(true, snake.contains(Point { x: 1, y: 0 }));
+        assert_eq!(true, snake.contains(Point { x: 1, y: 1 }));
     }
 }

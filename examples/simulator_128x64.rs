@@ -1,29 +1,33 @@
 //! # Example: Run Snake on a 128x64 display, like an SSD1306. Scaling is employed as such display is very tiny in reality.
 //!
 
-use embedded_graphics::{
-    pixelcolor::{BinaryColor},
-    prelude::*,
-};
+use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 use embedded_graphics_simulator::{
     sdl2::Keycode, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
-use std::{thread, time::Duration};
 use rand::rngs::ThreadRng;
+use std::{thread, time::Duration};
 
 use snake::*;
 
 fn main() -> Result<(), std::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
 
-    let output_settings = OutputSettingsBuilder::new().scale(5).theme(embedded_graphics_simulator::BinaryColorTheme::OledBlue).build();
+    let output_settings = OutputSettingsBuilder::new()
+        .scale(5)
+        .theme(embedded_graphics_simulator::BinaryColorTheme::OledBlue)
+        .build();
     let mut window = Window::new("Progress", &output_settings);
     let mut game = SnakeGame::<100, BinaryColor, ThreadRng>::new(
-        128, 64, 3, 3,
+        128,
+        64,
+        3,
+        3,
         rand::thread_rng(),
         BinaryColor::On,
         BinaryColor::On,
-        50);
+        50,
+    );
     window.update(&display);
     'running: loop {
         for event in window.events() {
