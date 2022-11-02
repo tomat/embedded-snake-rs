@@ -3,7 +3,7 @@
 use embedded_graphics::{
     pixelcolor::*,
     prelude::{DrawTarget, Point, OriginDimensions, Size},
-    Drawable, Pixel,
+    Drawable, Pixel, primitives::{Rectangle, PrimitiveStyle, Primitive},
 };
 
 struct Snake<T: PixelColor, const MAX_SIZE: usize> {
@@ -148,21 +148,23 @@ pub enum Direction {
     None,
 }
 
-pub struct SnakeGame<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> {
-    snake: Snake<T, MAX_SIZE>,
+pub struct SnakeGame<const MAX_SNAKE_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> {
+    snake: Snake<T, MAX_SNAKE_SIZE>,
     food: Food<T, RNG>,
     food_age: u8,
     food_lifetime: u8,
     size_x: u8,
-    size_y: u8
+    size_y: u8,
+    scale_x: u8,
+    scale_y: u8
 }
 
 impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MAX_SIZE, T, RNG> {
-    pub fn new(size_x: u8, size_y: u8, rand_source: RNG, snake_color: T, food_color: T, food_lifetime: u8) -> Self {
-        let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x, size_y);
-        let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x, size_y);
+    pub fn new(size_x: u8, size_y: u8, scale_x: u8, scale_y: u8, rand_source: RNG, snake_color: T, food_color: T, food_lifetime: u8) -> Self {
+        let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x / scale_x, size_y / scale_y);
+        let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x / scale_x, size_y / scale_y);
         food.replace(&snake);
-        SnakeGame { snake, food, food_age: 0, food_lifetime, size_x, size_y }
+        SnakeGame { snake, food, food_age: 0, food_lifetime, size_x, size_y, scale_x, scale_y }
     }
     pub fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
@@ -182,20 +184,22 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             self.food_age = 0;
         }
 
-        let mut scaled_display = ScaledDisplay::<D>{real_display: target, size_x: self.size_x, size_y: self.size_y};
+        let mut scaled_display = ScaledDisplay::<D>{real_display: target, size_x: self.size_x / self.scale_x, size_y: self.size_y / self.scale_y, scale_x: self.scale_x, scale_y: self.scale_y};
 
         for part in self.snake.into_iter() {
             _ = part.draw(&mut scaled_display);
         }
-        _ = self.food.get_pixel().draw(target);
+        _ = self.food.get_pixel().draw(&mut scaled_display);
     }
 }
 
-/// A fake 64px x 64px display.
+/// A dummy DrawTarget implementation that can magnify each pixel so the user code does not need to adapt for scaling things
 struct ScaledDisplay<'a, T: DrawTarget> {
     real_display: &'a mut T,
     size_x: u8,
-    size_y: u8
+    size_y: u8,
+    scale_x: u8,
+    scale_y: u8,
 }
 
  impl<'a, T: DrawTarget> DrawTarget for ScaledDisplay<'a, T> {
@@ -206,7 +210,13 @@ struct ScaledDisplay<'a, T: DrawTarget> {
     where
         I: IntoIterator<Item = Pixel<Self::Color>>,
     {
-        self.real_display.draw_iter(pixels)
+        for pixel in pixels {
+            let style = PrimitiveStyle::with_fill(pixel.1);
+            Rectangle::new(Point::new(pixel.0.x * self.scale_x as i32, pixel.0.y * self.scale_y as i32), Size::new(self.scale_x as u32, self.scale_y as u32))
+            .into_styled(style)
+            .draw(self.real_display)?;
+        }
+        Ok(())
     }
 }
 

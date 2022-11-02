@@ -19,7 +19,7 @@ fn main() -> Result<(), std::convert::Infallible> {
     let output_settings = OutputSettingsBuilder::new().scale(5).theme(embedded_graphics_simulator::BinaryColorTheme::OledBlue).build();
     let mut window = Window::new("Progress", &output_settings);
     let mut game = SnakeGame::<100, BinaryColor, ThreadRng>::new(
-        128, 64,
+        128, 64, 3, 3,
         rand::thread_rng(),
         BinaryColor::On,
         BinaryColor::On,

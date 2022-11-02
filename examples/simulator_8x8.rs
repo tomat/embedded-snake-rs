@@ -18,7 +18,7 @@ fn main() -> Result<(), std::convert::Infallible> {
 
     let output_settings = OutputSettingsBuilder::new().scale(30).build();
     let mut window = Window::new("Progress", &output_settings);
-    let mut game = SnakeGame::<20, Rgb888, ThreadRng>::new(8, 8, rand::thread_rng(), Rgb888::RED, Rgb888::YELLOW, 10);
+    let mut game = SnakeGame::<20, Rgb888, ThreadRng>::new(8, 8, 1, 1, rand::thread_rng(), Rgb888::RED, Rgb888::YELLOW, 10);
     window.update(&display);
     'running: loop {
         for event in window.events() {
