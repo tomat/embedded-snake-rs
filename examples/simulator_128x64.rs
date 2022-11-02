@@ -1,4 +1,4 @@
-//! # Example: Run Snake on a 8x8 RGB display, like a LED matrix
+//! # Example: Run Snake on a 128x64 display, like an SSD1306. Scaling is employed as such display is very tiny in reality.
 //!
 
 use embedded_graphics::{
