@@ -2,7 +2,7 @@
 
 use embedded_graphics::{
     pixelcolor::*,
-    prelude::{DrawTarget, Point},
+    prelude::{DrawTarget, Point, OriginDimensions, Size},
     Drawable, Pixel,
 };
 
@@ -152,7 +152,9 @@ pub struct SnakeGame<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCo
     snake: Snake<T, MAX_SIZE>,
     food: Food<T, RNG>,
     food_age: u8,
-    food_lifetime: u8
+    food_lifetime: u8,
+    size_x: u8,
+    size_y: u8
 }
 
 impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MAX_SIZE, T, RNG> {
@@ -160,7 +162,7 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
         let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x, size_y);
         let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x, size_y);
         food.replace(&snake);
-        SnakeGame { snake, food, food_age: 0, food_lifetime }
+        SnakeGame { snake, food, food_age: 0, food_lifetime, size_x, size_y }
     }
     pub fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
@@ -179,10 +181,38 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             self.food.replace(&self.snake);
             self.food_age = 0;
         }
+
+        let mut scaled_display = ScaledDisplay::<D>{real_display: target, size_x: self.size_x, size_y: self.size_y};
+
         for part in self.snake.into_iter() {
-            _ = part.draw(target);
+            _ = part.draw(&mut scaled_display);
         }
         _ = self.food.get_pixel().draw(target);
+    }
+}
+
+/// A fake 64px x 64px display.
+struct ScaledDisplay<'a, T: DrawTarget> {
+    real_display: &'a mut T,
+    size_x: u8,
+    size_y: u8
+}
+
+ impl<'a, T: DrawTarget> DrawTarget for ScaledDisplay<'a, T> {
+    type Color = T::Color;
+    type Error = T::Error;
+
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        self.real_display.draw_iter(pixels)
+    }
+}
+
+impl<'a, T: DrawTarget> OriginDimensions for ScaledDisplay<'a, T> {
+    fn size(&self) -> Size {
+        Size::new(self.size_x as u32, self.size_y as u32)
     }
 }
 
