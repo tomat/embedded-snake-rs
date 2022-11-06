@@ -1,9 +1,14 @@
 [package]
-name = "snake"
-version = "0.1.0"
+name = "embedded-snake"
+description = "Snake game implementation in Rust with no-std. It uses embedded-graphics as a display target."
+version = "0.0.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+keywords = ["embedded-graphics", "graphics", "embedded", "game", "snake"]
+categories = ["embedded", "no-std"]
+homepage = "https://github.com/libesz/embedded-snake-rs/"
+repository = "https://github.com/libesz/embedded-snake-rs/"
+license = "Apache-2.0"
+exclude = [".vscode/launch.json"]
 
 [dependencies]
 embedded-graphics = "0.7.0"

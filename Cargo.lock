@@ -190,6 +190,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "embedded-snake"
+version = "0.0.1"
+dependencies = [
+ "embedded-graphics",
+ "embedded-graphics-simulator",
+ "rand 0.8.5",
+ "rand_core 0.6.4",
+]
+
+[[package]]
 name = "float-cmp"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -591,16 +601,6 @@ checksum = "34e71125077d297d57e4c1acfe8981b5bdfbf5a20e7b589abfdcb33bf1127f86"
 dependencies = [
  "cfg-if 0.1.10",
  "libc",
-]
-
-[[package]]
-name = "snake"
-version = "0.1.0"
-dependencies = [
- "embedded-graphics",
- "embedded-graphics-simulator",
- "rand 0.8.5",
- "rand_core 0.6.4",
 ]
 
 [[package]]
