@@ -1,7 +1,7 @@
 [package]
 name = "embedded-snake"
 description = "Snake game implementation in Rust with no-std. It uses embedded-graphics as a display target."
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 keywords = ["embedded-graphics", "graphics", "embedded", "game", "snake"]
 categories = ["embedded", "no-std"]

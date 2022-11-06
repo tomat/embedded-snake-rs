@@ -8,7 +8,7 @@ use embedded_graphics_simulator::{
 use rand::rngs::ThreadRng;
 use std::{thread, time::Duration};
 
-use snake::*;
+use embedded_snake::*;
 
 fn main() -> Result<(), std::convert::Infallible> {
     let mut display: SimulatorDisplay<BinaryColor> = SimulatorDisplay::new(Size::new(128, 64));
