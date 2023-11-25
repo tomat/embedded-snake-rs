@@ -11,7 +11,7 @@ license = "Apache-2.0"
 exclude = [".vscode/launch.json"]
 
 [dependencies]
-embedded-graphics = "0.7.0"
+embedded-graphics = "0.8.1"
 rand_core = "0.6.4"
 
 [dev-dependencies]
