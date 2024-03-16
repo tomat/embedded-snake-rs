@@ -7,7 +7,7 @@ use embedded_graphics::{
     Drawable, Pixel,
 };
 
-struct Snake<T: PixelColor, const MAX_SIZE: usize> {
+pub struct Snake<T: PixelColor, const MAX_SIZE: usize> {
     parts: [Pixel<T>; MAX_SIZE],
     pub len: usize,
     direction: Direction,
