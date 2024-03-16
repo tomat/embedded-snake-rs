@@ -15,7 +15,7 @@ pub struct Snake<T: PixelColor, const MAX_SIZE: usize> {
     size_y: u8,
 }
 
-struct SnakeIntoIterator<'a, T: PixelColor, const MAX_SIZE: usize> {
+pub struct SnakeIntoIterator<'a, T: PixelColor, const MAX_SIZE: usize> {
     snake: &'a Snake<T, MAX_SIZE>,
     index: usize,
 }
