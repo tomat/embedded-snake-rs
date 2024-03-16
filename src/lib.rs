@@ -9,7 +9,7 @@ use embedded_graphics::{
 
 struct Snake<T: PixelColor, const MAX_SIZE: usize> {
     parts: [Pixel<T>; MAX_SIZE],
-    len: usize,
+    pub len: usize,
     direction: Direction,
     size_x: u8,
     size_y: u8,
@@ -163,7 +163,7 @@ pub enum Direction {
 }
 
 pub struct SnakeGame<const MAX_SNAKE_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> {
-    snake: Snake<T, MAX_SNAKE_SIZE>,
+    pub snake: Snake<T, MAX_SNAKE_SIZE>,
     food: Food<T, RNG>,
     food_age: u8,
     food_lifetime: u8,
