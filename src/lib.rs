@@ -1,5 +1,3 @@
-#![no_std]
-
 use embedded_graphics::{
     pixelcolor::*,
     prelude::{DrawTarget, OriginDimensions, Point, Size},
