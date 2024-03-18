@@ -8,7 +8,7 @@ use embedded_graphics::{
 pub struct Snake<T: PixelColor, const MAX_SIZE: usize> {
     parts: [Pixel<T>; MAX_SIZE],
     pub len: usize,
-    direction: Direction,
+    pub direction: Direction,
     size_x: u8,
     size_y: u8,
 }
