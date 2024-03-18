@@ -162,6 +162,12 @@ pub enum Direction {
     None,
 }
 
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub enum GameStatus {
+    Continue,
+    End,
+}
+
 pub struct SnakeGame<const MAX_SNAKE_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> {
     pub snake: Snake<T, MAX_SNAKE_SIZE>,
     food: Food<T, RNG>,
@@ -202,11 +208,19 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
     pub fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
     }
-    pub fn draw<D>(&mut self, target: &mut D) -> ()
+    pub fn draw<D>(&mut self, target: &mut D) -> GameStatus
     where
         D: DrawTarget<Color = T>,
     {
         self.snake.make_step();
+
+        let snake_parts = &self.snake.parts[1..];
+        for s in snake_parts {
+            if s.0 == self.snake.parts[0].0 {
+                return GameStatus::End;
+            }
+        }
+
         let hit = self.snake.contains(self.food.get_pixel().0);
         if hit {
             self.snake.grow();
@@ -229,6 +243,8 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             _ = part.draw(&mut scaled_display);
         }
         _ = self.food.get_pixel().draw(&mut scaled_display);
+
+        GameStatus::Continue
     }
 }
 
