@@ -196,7 +196,7 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
         food_lifetime: u8,
         player_count: usize,
     ) -> Self {
-        let snakes: [Snake<T, MAX_SIZE>; 3] = [
+        let snakes = [
             Snake::<T, MAX_SIZE>::new(snake_colors[0], size_x / scale_x, size_y / scale_y, Point{ x: 0, y: 0 }, Direction::Right),
             Snake::<T, MAX_SIZE>::new(snake_colors[1], size_x / scale_x, size_y / scale_y, Point{ x: 0, y: 7 }, Direction::Right),
             Snake::<T, MAX_SIZE>::new(snake_colors[2], size_x / scale_x, size_y / scale_y, Point{ x: 31, y: 0 }, Direction::Left),
