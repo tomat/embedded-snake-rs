@@ -4,6 +4,7 @@ use embedded_graphics::{
     primitives::{Primitive, PrimitiveStyle, Rectangle},
     Drawable, Pixel,
 };
+use serde::{Deserialize, Serialize};
 
 pub struct Snake<T: PixelColor, const MAX_SIZE: usize> {
     pub color: T,
@@ -157,7 +158,7 @@ impl<T: PixelColor, RNG: rand_core::RngCore> Food<T, RNG> {
     }
 }
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum Direction {
     Left,
     Right,

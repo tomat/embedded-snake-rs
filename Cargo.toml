@@ -13,6 +13,7 @@ exclude = [".vscode/launch.json"]
 [dependencies]
 embedded-graphics = "0.8.1"
 rand_core = "0.6.4"
+serde = { version = "1.0.197", features = ["derive"] }
 
 [dev-dependencies]
 embedded-graphics-simulator = "0.3.0"
