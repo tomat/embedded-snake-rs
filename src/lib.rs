@@ -44,11 +44,11 @@ impl<'a, T: PixelColor, const MAX_SIZE: usize> Iterator for SnakeIntoIterator<'a
 }
 
 impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
-    fn new(color: T, size_x: u8, size_y: u8) -> Snake<T, MAX_SIZE> {
+    fn new(color: T, size_x: u8, size_y: u8, start_at: Point, starting_direction: Direction) -> Snake<T, MAX_SIZE> {
         Snake {
-            parts: [Pixel::<T>(Point { x: 0, y: 0 }, color); MAX_SIZE],
+            parts: [Pixel::<T>(start_at, color); MAX_SIZE],
             len: 5,
-            direction: Direction::None,
+            direction: starting_direction,
             size_x,
             size_y,
         }
@@ -125,18 +125,22 @@ impl<T: PixelColor, RNG: rand_core::RngCore> Food<T, RNG> {
             rng: rand_source,
         }
     }
-    fn replace<'a, const MAX_SIZE: usize>(&mut self, iter_source: &Snake<T, MAX_SIZE>) {
+    fn replace<'a, const MAX_SIZE: usize>(&mut self, iter_source: &[Snake<T, MAX_SIZE>; 3]) {
         let mut p: Point;
         'outer: loop {
             let random_number = self.rng.next_u32();
-            let blocked_positions = iter_source.into_iter();
+
             p = Point {
                 x: ((random_number >> 24) as u8 % self.size_x).into(),
                 y: ((random_number >> 16) as u8 % self.size_y).into(),
             };
-            for blocked_position in blocked_positions {
-                if p == blocked_position.0 {
-                    continue 'outer;
+            let snakes = iter_source.into_iter();
+            for s in snakes {
+                let blocked_positions = s.into_iter();
+                for blocked_position in blocked_positions {
+                    if p == blocked_position.0 {
+                        continue 'outer;
+                    }
                 }
             }
             break;
@@ -167,7 +171,7 @@ pub enum GameStatus {
 }
 
 pub struct SnakeGame<const MAX_SNAKE_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> {
-    pub snake: Snake<T, MAX_SNAKE_SIZE>,
+    pub snakes: [Snake<T, MAX_SNAKE_SIZE>; 3],
     food: Food<T, RNG>,
     food_age: u8,
     food_lifetime: u8,
@@ -175,6 +179,7 @@ pub struct SnakeGame<const MAX_SNAKE_SIZE: usize, T: PixelColor, RNG: rand_core:
     size_y: u8,
     scale_x: u8,
     scale_y: u8,
+    pub player_count: usize,
 }
 
 impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MAX_SIZE, T, RNG> {
@@ -184,16 +189,22 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
         scale_x: u8,
         scale_y: u8,
         rand_source: RNG,
-        snake_color: T,
+        snake_colors: [T; 3],
         food_color: T,
         food_lifetime: u8,
+        player_count: usize,
     ) -> Self {
-        let snake = Snake::<T, MAX_SIZE>::new(snake_color, size_x / scale_x, size_y / scale_y);
-        let mut food =
-            Food::<T, RNG>::new(food_color, rand_source, size_x / scale_x, size_y / scale_y);
-        food.replace(&snake);
+        let snakes: [Snake<T, MAX_SIZE>; 3] = [
+            Snake::<T, MAX_SIZE>::new(snake_colors[0], size_x / scale_x, size_y / scale_y, Point{ x: 0, y: 0 }, Direction::Right),
+            Snake::<T, MAX_SIZE>::new(snake_colors[1], size_x / scale_x, size_y / scale_y, Point{ x: 0, y: 7 }, Direction::Right),
+            Snake::<T, MAX_SIZE>::new(snake_colors[2], size_x / scale_x, size_y / scale_y, Point{ x: 31, y: 0 }, Direction::Left),
+        ];
+
+        let mut food = Food::<T, RNG>::new(food_color, rand_source, size_x / scale_x, size_y / scale_y);
+        food.replace(&snakes);
+
         SnakeGame {
-            snake,
+            snakes,
             food,
             food_age: 0,
             food_lifetime,
@@ -201,34 +212,40 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             size_y,
             scale_x,
             scale_y,
+            player_count,
         }
     }
-    pub fn set_direction(&mut self, direction: Direction) {
-        self.snake.set_direction(direction);
+    pub fn set_direction(&mut self, player: usize, direction: Direction) {
+        self.snakes[player].set_direction(direction);
     }
     pub fn draw<D>(&mut self, target: &mut D) -> GameStatus
     where
         D: DrawTarget<Color = T>,
     {
-        self.snake.make_step();
+        let mut hit = false;
+        for snake in self.snakes.iter_mut().take(self.player_count) {
+            snake.make_step();
 
-        let snake_parts = &self.snake.parts[1..self.snake.len];
-        println!("snek ded check {:?}", snake_parts.iter().map(|p| p.0).collect::<Vec<_>>());
-        for (i, s) in snake_parts.iter().enumerate() {
-            if s.0 == self.snake.parts[0].0 {
-                println!("{i}: {:?} == {:?}", s.0, self.snake.parts[0].0);
+            let snake_parts = &snake.parts[1..snake.len];
+            println!("snek ded check {:?}", snake_parts.iter().map(|p| p.0).collect::<Vec<_>>());
+            for (i, s) in snake_parts.iter().enumerate() {
+                if s.0 == snake.parts[0].0 {
+                    println!("{i}: {:?} == {:?}", s.0, snake.parts[0].0);
 
-                return GameStatus::End;
+                    return GameStatus::End;
+                }
             }
-        }
 
-        let hit = self.snake.contains(self.food.get_pixel().0);
-        if hit {
-            self.snake.grow();
+            if !hit {
+                hit = snake.contains(self.food.get_pixel().0);
+                if hit {
+                    snake.grow();
+                }
+            }
         }
         self.food_age += 1;
         if self.food_age >= self.food_lifetime || hit {
-            self.food.replace(&self.snake);
+            self.food.replace(&self.snakes);
             self.food_age = 0;
         }
 
@@ -240,8 +257,10 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             scale_y: self.scale_y,
         };
 
-        for part in self.snake.into_iter() {
-            _ = part.draw(&mut scaled_display);
+        for snake in self.snakes.iter().take(self.player_count) {
+            for part in snake.into_iter() {
+                _ = part.draw(&mut scaled_display);
+            }
         }
         _ = self.food.get_pixel().draw(&mut scaled_display);
 
