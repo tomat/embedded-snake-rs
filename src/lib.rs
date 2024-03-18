@@ -215,8 +215,11 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
         self.snake.make_step();
 
         let snake_parts = &self.snake.parts[1..];
-        for s in snake_parts {
+        println!("snek ded check {:?}", snake_parts);
+        for (i, s) in snake_parts.iter().enumerate() {
             if s.0 == self.snake.parts[0].0 {
+                println!("{i}: {:?} == {:?}", s.0, self.snake.parts[0].0);
+
                 return GameStatus::End;
             }
         }
