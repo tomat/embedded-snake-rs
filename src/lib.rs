@@ -229,7 +229,6 @@ impl<const MAX_SIZE: usize, T: PixelColor, RNG: rand_core::RngCore> SnakeGame<MA
             snake.make_step();
 
             let snake_parts = &snake.parts[1..snake.len];
-            println!("snek ded check {:?}", snake_parts.iter().map(|p| p.0).collect::<Vec<_>>());
             for (i, s) in snake_parts.iter().enumerate() {
                 if s.0 == snake.parts[0].0 {
                     println!("{i}: {:?} == {:?}", s.0, snake.parts[0].0);
