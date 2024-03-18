@@ -6,6 +6,7 @@ use embedded_graphics::{
 };
 
 pub struct Snake<T: PixelColor, const MAX_SIZE: usize> {
+    pub color: T,
     parts: [Pixel<T>; MAX_SIZE],
     pub len: usize,
     pub direction: Direction,
@@ -46,6 +47,7 @@ impl<'a, T: PixelColor, const MAX_SIZE: usize> Iterator for SnakeIntoIterator<'a
 impl<T: PixelColor, const MAX_SIZE: usize> Snake<T, MAX_SIZE> {
     fn new(color: T, size_x: u8, size_y: u8, start_at: Point, starting_direction: Direction) -> Snake<T, MAX_SIZE> {
         Snake {
+            color,
             parts: [Pixel::<T>(start_at, color); MAX_SIZE],
             len: 5,
             direction: starting_direction,
